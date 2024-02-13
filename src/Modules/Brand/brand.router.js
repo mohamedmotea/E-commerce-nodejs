@@ -10,7 +10,7 @@ const router = Router()
 
 
 router.post('/',multerMiddleware().single('logo'),vld(validationSchema.addBrand),auth([rule.SUPERADMIN,rule.ADMIN]),expressAsyncHandler(BC.addBrand))
-.patch('/:brandId',multerMiddleware().single('logo'),auth([rule.SUPERADMIN,rule.ADMIN]),vld(validationSchema.updateBrand),expressAsyncHandler(BC.updateBrand))
+.patch('/:brandId',multerMiddleware().single('logo'),auth([rule.ADMIN]),vld(validationSchema.updateBrand),expressAsyncHandler(BC.updateBrand))
 .get('/:brandId',vld(validationSchema.brandParams),expressAsyncHandler(BC.getSingleBrand))
 .get('/',expressAsyncHandler(BC.getAllBrands))
 .delete('/:brandId',auth([rule.SUPERADMIN,rule.ADMIN]),vld(validationSchema.brandParams),expressAsyncHandler(BC.deleteBrand))
