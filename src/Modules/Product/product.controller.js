@@ -4,6 +4,7 @@ import { rule } from "../../utils/systemRule.js";
 import Brand from './../../../DB/Models/brand.model.js';
 import cloudinaryConnection from './../../utils/cloudinary.js';
 import uniqueString from './../../utils/generate-unique-string.js';
+import ApiFeatures from "../../utils/api-features.js";
 
 export const addProduct = async (req, res, next) => {
   // destructuring the request body
@@ -118,23 +119,14 @@ export const updateProduct = async (req, res, next) => {
     data:product
   })
 }
-
-export const getAllProducts = async (req, res) => {
-  const products = await Product.find().populate([{path: 'brandId'},{path: 'categoryId'},{path:'subCategoryId'},{path:'addedBy',select:'username'}])
-  res.status(200).json({
-    message:'products fetched successfully',
-    data:products
-  })
-}
-
 export const getSingleProduct = async (req, res) => {
   const {productId} = req.params
   const product = await Product.findById(productId).populate([{path: 'brandId'},{path: 'categoryId'},{path:'subCategoryId'},{path:'addedBy',select:'username'}])
   if(!product) return next(new Error('Product not found',{cause:404}))
   res.status(200).json({
-    message:'product fetched successfully',
-    data:product
-  })
+message:'product fetched successfully',
+data:product
+})
 }
 
 export const deleteProduct = async (req, res, next) => {
@@ -144,10 +136,21 @@ export const deleteProduct = async (req, res, next) => {
   const product = await Product.findById(productId)
   if(!product) return next(new Error('product not found',{cause:404}))
   // check authorization
-  if(role != rule.SUPERADMIN && id != product.addedBy ) return next(new Error('Unauthorized To Delete This Product',{cause:401}))
-  const dltProduct = await Product.findByIdAndDelete(productId)
+if(role != rule.SUPERADMIN && id != product.addedBy ) return next(new Error('Unauthorized To Delete This Product',{cause:401}))
+const dltProduct = await Product.findByIdAndDelete(productId)
+res.status(200).json({
+  message:'product deleted successfully',
+  data:dltProduct
+})
+}
+
+export const getAllProducts = async (req, res) => {
+  // const products = await Product.find().populate([{path: 'brandId'},{path: 'categoryId'},{path:'subCategoryId'},{path:'addedBy',select:'username'}])
+  const {page , size , sort,...search} = req.query
+  const feature = new ApiFeatures(req.query,Product.find()).pagination({page,size}).sort(sort).search(search).filter(search)
+  const products = await feature.mongooseQuery
   res.status(200).json({
-    message:'product deleted successfully',
-    data:dltProduct
+    message:'products fetched successfully',
+    data:products
   })
 }

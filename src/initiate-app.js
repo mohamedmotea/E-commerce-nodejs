@@ -17,6 +17,8 @@ const initiateApp = (app,express)=>{
   app.use('/subcategory',router.subCategoryRouter)
   app.use('/brand',router.brandRouter)
   app.use('/product',router.productRouter)
+  app.use('/cart',router.cartRouter)
+  app.use('/coupon',router.couponRouter)
   
   // middleware to handle any errors
   app.use(globalResponse,rollbackUploudedFiles,rollbackSavedDocuments)
