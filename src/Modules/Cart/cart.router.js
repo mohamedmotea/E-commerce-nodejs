@@ -8,6 +8,6 @@ import { rule } from "../../utils/systemRule.js";
 import vld from './../../Middlewares/validation.middleware.js';
 const router = Router();
 
-router.post('/', auth([rule.USER,rule.SUPERADMIN]), vld(validationSchema.addProductToCart), expressAsyncHandler(CC.addProductToCart))
-.put('/:productId',vld(validationSchema.removeProductFromCart),auth([rule.USER,rule.SUPERADMIN]),expressAsyncHandler(CC.removeProductFromCart))
+router.post('/', auth([rule.USER]), vld(validationSchema.addProductToCart), expressAsyncHandler(CC.addProductToCart))
+.put('/:productId',vld(validationSchema.removeProductFromCart),auth([rule.USER]),expressAsyncHandler(CC.removeProductFromCart))
 export default router

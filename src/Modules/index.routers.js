@@ -6,6 +6,7 @@ import brandRouter from "./Brand/brand.router.js";
 import productRouter from "./Product/product.router.js";
 import cartRouter from './Cart/cart.router.js';
 import couponRouter from './Coupon/coupon.router.js';
+import orderRouter from './Order/order.router.js';
 
 export {
   authRouter,
@@ -15,5 +16,6 @@ export {
   brandRouter,
   productRouter,
   cartRouter,
-  couponRouter
+  couponRouter,
+  orderRouter
 }

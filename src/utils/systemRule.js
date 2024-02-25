@@ -2,5 +2,20 @@
 export const rule = {
   USER: 'user',
   ADMIN: 'admin',
-  SUPERADMIN:'superadmin'
+  SUPERADMIN:'superadmin',
+  DELIVER:'deliver'
+}
+
+export const paymentMethod = {
+  CASH: 'Cash',
+  CREDIT: 'Credit Card',
+  PAYMOB:'Paymob'
+}
+
+export const orderstatus = {
+  PENDING: 'Pending',
+  PLACED: 'Placed',
+  DELIVERED: 'Delivered',
+  CANCELLED: 'Cancelled',
+  PAID: 'Paid'
 }

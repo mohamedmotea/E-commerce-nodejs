@@ -4,6 +4,7 @@ import SubCategory from './../../../DB/Models/sub-category.model.js';
 import uniqueString from './../../utils/generate-unique-string.js';
 import cloudinaryConnection from './../../utils/cloudinary.js';
 import Product from './../../../DB/Models/product.model.js';
+import ApiFeatures from './../../utils/api-features.js';
 
 
 export const addBrand = async (req,res,next)=>{
@@ -90,7 +91,9 @@ export const updateBrand = async (req,res,next)=>{
 }
 
 export const getAllBrands = async (req,res,next)=>{
-  const brands = await Brand.find().populate([{path: 'categoryId'},{path: 'subCategoryId'}])
+  const {page,size,sort,...search} = req.query
+  const feature = new ApiFeatures(req.query,Brand.find().populate([{path: 'categoryId'},{path: 'subCategoryId'}])).pagination({page,size}).sort(sort).search(search).filter(search)
+  const brands = await feature.mongooseQuery
   res.status(200).json({
     message:'brands fetched successfully',
     data:brands

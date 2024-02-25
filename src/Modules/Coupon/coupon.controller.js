@@ -1,6 +1,7 @@
 
 import CouponUsers from '../../../DB/Models/coupon-users.model.js';
 import User from '../../../DB/Models/user.model.js';
+import checkCoupon from '../../utils/checkCoupon.js';
 import { rule } from '../../utils/systemRule.js';
 import Coupon from './../../../DB/Models/coupon.model.js';
 import ApiFeatures from './../../utils/api-features.js';
@@ -106,7 +107,7 @@ export const deleteCoupon = async (req,res,next)=>{
   const coupon = await Coupon.findById(couponId)
   // check if coupon vaild
   if(!coupon) return next(new Error('coupon not found',{cause:404}))
-  if(role != rule.SUPERADMIN || id != coupon.addedBy) return next(new Error('unauthorized',{cause:403}))
+  if(role != rule.SUPERADMIN && id != coupon.addedBy) return next(new Error('unauthorized',{cause:403}))
   // delete coupon
   await Coupon.deleteOne({_id:couponId})
   res.status(200).json({message:'coupon deleted successfully',success:true})
@@ -132,4 +133,17 @@ export const getSingleCoupon = async (req,res,next)=>{
     message:'coupon fetched successfully',
     data:coupon
   })
+}
+
+export const validateCoupon = async (req, res, next)=>{
+  // destructuring the required data from request body
+  const {code} = req.body
+  // destructuring the required data from request authentcation
+  const {id :userId} = req.user
+  const coupon = await checkCoupon(code,userId)
+  if(coupon?.status) return next(new Error(coupon.message,{cause:coupon.status}))
+  // calc timesRemaining for user usage
+  const {maxUsage,usage} = coupon.checkAllowed
+  const timesRemaining = maxUsage - usage
+  res.status(200).json({message:'coupon use successfully',data:coupon.coupon,timesRemaining})
 }

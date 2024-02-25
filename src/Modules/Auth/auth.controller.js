@@ -1,7 +1,7 @@
-import User from "../../../DB/Models/user.model.js"
-import sendEmailService from "../Services/send-emails.services.js"
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import User from "../../../DB/Models/user.model.js"
+import verifyEmailService from './utils/verifyEmail.js';
 
 
 export const signUp = async (req,res,next)=>{
@@ -10,14 +10,10 @@ export const signUp = async (req,res,next)=>{
   // check if email is already exists in database
   const checkEmail = await User.findOne({email})
   if(checkEmail) return res.status(409).json({message: "Email already exists"})
-  // email Token 
-  const token = jwt.sign({email},process.env.VERIFICATION,{expiresIn: '1m'})
-  // send email verification
-  const verification = await sendEmailService({to:email,subject:'Verification',message:`<h2>Link Verification Email</h2>
-  <a href="http://localhost:3000/auth/verify?email=${token}">Click Here</a>
-  `})
+  // verify Email -> send code in email
+  const verify = await verifyEmailService(email,req)
   // check is email valid
-  if(!verification) return next(new Error('email verify fail',{cause:400})) 
+  if(!verify) return next(new Error('email verify fail',{cause:400})) 
   // Hashed password 
   const hashedPassword = bcrypt.hashSync(password,+process.env.SALT_ROUNDES)
   if(!hashedPassword) return next(new Error('password fail try again',{cause:400}))
@@ -51,7 +47,12 @@ export const signIn = async (req,res,next)=>{
   const account = await User.findOne({email})
   if(!account) return next(new Error('account not found',{cause:404}))
   // check if this account already verified
-  if (!account.isEmailVerified ) return next(new Error('account not verified',{cause:400}))
+  if (!account.isEmailVerified ) {
+      // verify Email -> send code in email
+      const verify = await verifyEmailService(email,req)
+      if(!verify) return next(new Error('email verify fail',{cause:400}))   
+      return next(new Error('account not verified',{cause:400}))
+  }
   // check if password is correct
   const isPasswordCorrect = bcrypt.compareSync(password,account.password)
   if(!isPasswordCorrect) return next(new Error('password incorrect',{cause:400}))
@@ -82,14 +83,10 @@ export const updateUser = async (req,res,next)=>{
     // check if email is already exists in database
     const checkEmail = await User.findOne({email})
     if(checkEmail) return next(new Error('Email is already exists',{cause:409}))
-    // email token
-    const token = jwt.sign({email},process.env.VERIFICATION,{expiresIn: '2m'})
-      // send email verification
-      const verification = await sendEmailService({to:email,subject:'Verification',message:`<h2>Link Verification Email</h2>
-      <a href="http://localhost:3000/auth/verify?email=${token}">Click Here</a>
-      `})
-      // check is email valid
-      if(!verification) return next(new Error('email verify fail',{cause:400}))
+    // verify Email -> send code in email
+    const verify = await verifyEmailService(email,req)
+    // check is email valid
+    if(!verify) return next(new Error('email verify fail',{cause:400})) 
       // reset email verification
       user.isEmailVerified = false
       await user.save()

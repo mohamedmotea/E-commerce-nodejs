@@ -30,7 +30,7 @@ export const updateCoupon = {
       userId:Joi.custom(validation.params),
       maxUsage:Joi.number().min(1)
     })),
-    oldUserIds:Joi.array().custom(validation.params)
+    oldUserIds:Joi.array().items(Joi.custom(validation.params))
   }),
   params:Joi.object({
     couponId:Joi.custom(validation.params).required()
@@ -48,5 +48,12 @@ export const deleteCoupon = {
 export const getSingleCoupon = {
   params:Joi.object({
     couponId:Joi.custom(validation.params).required()
+  })
+}
+
+export const appliedCoupons = {
+  headers:validation.headers,
+  body:Joi.object({
+    code:Joi.string().required()
   })
 }

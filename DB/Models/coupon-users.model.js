@@ -18,7 +18,8 @@ const couponUsers_schema = new Schema({
   },
   usage:{
     type: Number,
-    min:0
+    min:0,
+    default:0
   }
 },{timestamps:true})
 

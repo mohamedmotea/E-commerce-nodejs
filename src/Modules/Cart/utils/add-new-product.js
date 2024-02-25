@@ -7,8 +7,10 @@ export const addNewProduct = async (cart,product,quantity,userId)=>{
     userId,
     quantity,
     title:product.title,
-    basePrice:product.appliedPrice,
-    finalPrice:product.appliedPrice * quantity
+    basePrice:product.basePrice,
+    finalPrice:product.appliedPrice,
+    discount:product.discount,
+    totalPrice:product.appliedPrice * quantity
   })
 
 

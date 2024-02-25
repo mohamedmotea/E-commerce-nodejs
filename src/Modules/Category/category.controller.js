@@ -6,6 +6,7 @@ import cloudinaryConnection from '../../utils/cloudinary.js';
 import SubCategory from './../../../DB/Models/sub-category.model.js';
 import Brand from '../../../DB/Models/brand.model.js';
 import Product from '../../../DB/Models/product.model.js';
+import ApiFeatures from './../../utils/api-features.js';
 
 export const addCategory = async (req,res,next)=>{
   // destructuring the request body
@@ -112,7 +113,10 @@ export const deleteCategory = async (req,res,next)=>{
 }
 
 export const getAllCategories = async (req,res,next)=>{
-  const categories = await Category.find().populate([{path:'subcategories',populate:'brands'}])
+  // destructuring data from request query
+  const {page,size,sort,...search} = req.query
+  const features = new ApiFeatures(req.query,Category.find().populate([{path:'subcategories',populate:'brands'}])).pagination({page,size}).sort(sort).search(search).filter(search)
+  const categories = await features.mongooseQuery
   res.status(200).json({
     message:'Categories fetched successfully',
     data:categories

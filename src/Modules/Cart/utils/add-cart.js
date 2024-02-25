@@ -9,8 +9,10 @@ export const addCart = async(userId,product,quantity,req)=>{
         productId:product._id,
         quantity,
         title:product.title,
-        basePrice:product.appliedPrice,
-        finalPrice:product.appliedPrice * quantity
+        basePrice:product.basePrice,
+        finalPrice:product.appliedPrice,
+        discount:product.discount,
+        totalPrice:product.appliedPrice * quantity
       }
     ],
     subTotal:product.appliedPrice * quantity
