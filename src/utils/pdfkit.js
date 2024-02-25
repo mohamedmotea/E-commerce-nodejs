@@ -74,9 +74,9 @@ function generateInvoiceTable(doc, invoice) {
     'Item',
     'Unit Cost',
     'Discount',
-    'final Price',
+    'Final Price',
     'Quantity',
-    'total Price',
+    'Total Price',
   )
   generateHr(doc, invoiceTableTop + 20)
   doc.font('Helvetica')

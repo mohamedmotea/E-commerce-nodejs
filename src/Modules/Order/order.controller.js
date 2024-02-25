@@ -1,3 +1,4 @@
+import path from 'path'
 import { DateTime } from "luxon";
 import Order from "../../../DB/Models/order.model.js";
 import checkCoupon from "../../utils/checkCoupon.js";
@@ -8,6 +9,7 @@ import * as systemRule from "../../utils/systemRule.js";
 import generateQrCode from "../../utils/qrcode.js";
 import createInvoice from "../../utils/pdfkit.js";
 import uniqueString from './../../utils/generate-unique-string.js';
+import sendEmailService from './../Services/send-emails.services.js';
 
 export const createOrder = async (req, res, next) => {
   // destructuring the required data from request body
@@ -24,7 +26,7 @@ export const createOrder = async (req, res, next) => {
     paymentMethod,
   } = req.body;
   // destructuring user data from authentiction
-  const { id: userId ,username :name} = req.user;
+  const { id: userId ,username :name ,email} = req.user;
   // check coupon isValid
   const coupon = await checkCoupon(couponCode, userId);
   if (couponCode && coupon?.status)
@@ -125,8 +127,13 @@ export const createOrder = async (req, res, next) => {
     orderCode:userId,
     date:DateTime.now()
   }
+  
   const orderCode = `${name}_${uniqueString(4)}.pdf`
    createInvoice(orderInvoice,orderCode)
+   await sendEmailService({to:email,subject:'order from e-commerce',message:`
+   <h1>New Order ..</h1>
+   <p> please find your invoice pdf below </p>
+   `, attachments:[{path: path.resolve(`Files/${orderCode}`)}]})
   res
     .status(201)
     .json({
@@ -150,7 +157,7 @@ export const orderByCart = async (req, res, next) => {
     paymentMethod,
   } = req.body;
   // destructuring user data from authentiction
-  const { id: userId ,username:name} = req.user;
+  const { id: userId ,username:name ,email} = req.user;
   // get user Cart
   const cart = await Cart.findOne({userId}).populate('products.productId')
 
@@ -225,7 +232,7 @@ export const orderByCart = async (req, res, next) => {
     }
 
     // delete cart
-    // await Cart.deleteOne({userId})
+    await Cart.deleteOne({userId})
   // save in database
   await order.save();
    // generate pdf reset
@@ -240,7 +247,10 @@ export const orderByCart = async (req, res, next) => {
   }
   const orderCode = `${name}_${uniqueString(4)}.pdf`
    createInvoice(orderInvoice,orderCode)
-
+   await sendEmailService({to:email,subject:'order from e-commerce',message:`
+   <h1>New Order ..</h1>
+   <p> please find your invoice pdf below </p>
+   `, attachments:[{path: path.resolve(`Files/${orderCode}`)}]})
   res
     .status(201)
     .json({

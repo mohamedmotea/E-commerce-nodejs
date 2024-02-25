@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 
-const sendEmailService = async({to = '',subject = 'no-replay',message = '<h1>no content</h1>'})=>{
+const sendEmailService = async({to = '',subject = 'no-replay',message = '<h1>no content</h1>',attachments = []})=>{
   const transporter = nodemailer.createTransport({
     host: 'localhost',
     service: 'gmail',
@@ -17,6 +17,7 @@ const sendEmailService = async({to = '',subject = 'no-replay',message = '<h1>no 
     to, // list of receivers
     subject, // Subject line
     html:message, // html body
+    attachments:attachments
   })
   return info.accepted.length ? true : false
 }
