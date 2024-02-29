@@ -23,10 +23,15 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev":"nodemon"
+    
   },
   "keywords": [],
-  "author": "",
+  "author": "mohamedMote3",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "engines": {
+    "node": "18.17.1"
+  }
 }
