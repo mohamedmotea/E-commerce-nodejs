@@ -14,4 +14,7 @@ router
 .patch('/:orderId',vld(validationSchema.cancelledOrder),auth([rule.SUPERADMIN,rule.USER]),expressAsyncHandler(OC.cancelledOrder))
 .get('/:orderId',vld(validationSchema.cancelledOrder),auth([rule.SUPERADMIN]),expressAsyncHandler(OC.getOrderData))
 .get('/',vld(validationSchema.getOrders),auth([rule.SUPERADMIN,rule.USER]),expressAsyncHandler(OC.getOrders))
+// payment -> stripe
+.post('/checkout/:orderId',auth([rule.USER]),expressAsyncHandler(OC.payWithStripe))
+.post('/webhook/',expressAsyncHandler(OC.webhookLocal))
 export default router

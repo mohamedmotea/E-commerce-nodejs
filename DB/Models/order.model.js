@@ -40,7 +40,12 @@ const order_schema = new Schema({
   totalPrice:{type:Number,required:true},
   // Booleans
   isPaid:{type:Boolean,default:false},
-  isDelivered:{type:Boolean,default:false}
+  isDelivered:{type:Boolean,default:false},
+  
+
+  payment_method :{
+    type:String
+  }
 },{
   timestamps: true
 })

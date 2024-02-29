@@ -10,6 +10,7 @@ import generateQrCode from "../../utils/qrcode.js";
 import createInvoice from "../../utils/pdfkit.js";
 import uniqueString from './../../utils/generate-unique-string.js';
 import sendEmailService from './../Services/send-emails.services.js';
+import { confimedPaymentIntent, couponWithStripe, createCheckOutSession, createPaymentIntent } from './../../payment-handler/stripe.js';
 
 export const createOrder = async (req, res, next) => {
   // destructuring the required data from request body
@@ -45,7 +46,7 @@ export const createOrder = async (req, res, next) => {
       basePrice: checkProduct.basePrice,
       finalPrice:checkProduct.appliedPrice,
       discount:checkProduct.discount,
-      totalPrice:checkProduct.totalPrice
+      totalPrice:checkProduct.appliedPrice * quantity
     },
   ];
   // handle phoneNumbers
@@ -104,7 +105,7 @@ export const createOrder = async (req, res, next) => {
   await checkProduct.save();
 
   // generate qr code
-  const qrcode = await generateQrCode(order)
+  // const qrcode = await generateQrCode(order)
   // generate pdf reset
   const orderInvoice ={
     shipping:{
@@ -128,18 +129,18 @@ export const createOrder = async (req, res, next) => {
     date:DateTime.now()
   }
   
-  const orderCode = `${name}_${uniqueString(4)}.pdf`
-   createInvoice(orderInvoice,orderCode)
-   await sendEmailService({to:email,subject:'order from e-commerce',message:`
-   <h1>New Order ..</h1>
-   <p> please find your invoice pdf below </p>
-   `, attachments:[{path: path.resolve(`Files/${orderCode}`)}]})
+  // const orderCode = `${name}_${uniqueString(4)}.pdf`
+  //  createInvoice(orderInvoice,orderCode)
+  //  await sendEmailService({to:email,subject:'order from e-commerce',message:`
+  //  <h1>New Order ..</h1>
+  //  <p> please find your invoice pdf below </p>
+  //  `, attachments:[{path: path.resolve(`Files/${orderCode}`)}]})
   res
     .status(201)
     .json({
       message: "order created successfully",
       data: order,
-      qrcode,
+      // qrcode,
       success: true,
     });
 };
@@ -321,4 +322,60 @@ export const getOrderData = async (req,res,next) =>{
   const order = await Order.findById(orderId).populate([{path:'userId',select:'-password -__v'},{path:'cancelledBy',select:'-__v -password'},{path:'deliveredAt',select:'-__v -password'}])
   if(!order) return next(new Error('order not found',{cause:404}))
   res.status(200).json({message: 'Order fetched successfully',data:order})
+}
+
+
+// *********************** Payment ****************//
+
+export const payWithStripe = async (req, res, next) => {
+  // destructuring order id from request params
+  const {orderId} = req.params;
+  // destructuring user data from authentiction
+  const {id:userId , email:customer_email} = req.user
+  // get order data 
+  const order = await Order.findOne({_id:orderId,userId,orderStatus :systemRule.orderstatus.PENDING})
+  if(!order) return next(new Error('order not found',{cause:404}))
+
+  const paymentArguments = {
+    customer_email,
+    discounts:[],
+    metadata:{orderId:orderId.toString()},
+    line_items:order.orderItemes.map((item)=>{
+      return{
+        price_data:{
+          currency: 'EGP',
+          product_data:{
+            name:item.title
+          },
+          unit_amount:item.finalPrice * 100,
+        },
+        quantity:item.quantity
+      }
+    })
+  }
+  
+  if(order.couponId){ 
+    const stripeCoupon = await couponWithStripe(order.couponId)
+    if(stripeCoupon.status) return next (new Error(stripeCoupon.message,{cause:stripeCoupon.status}))
+    paymentArguments.discounts.push({coupon:stripeCoupon.id})
+  }
+
+  const payment = await createCheckOutSession(paymentArguments)
+  const paymentIntent = await createPaymentIntent({amount:order.totalPrice})
+  order.payment_method = paymentIntent.id
+  await order.save()
+  res.status(200).json({data:payment,paymentIntent})
+}
+
+// webhook local
+export const webhookLocal = async (req, res ,next) => {
+  const order = await Order.findById(req.body.data.object.metadata.orderId)
+  if(!order) return next(new Error('order not found',{cause:404}))
+  await confimedPaymentIntent({paymentIntentId:order.payment_method})
+  order.orderStatus = systemRule.orderstatus.PAID,
+  order.isPaid = true,
+  order.paidAt = DateTime.now().toFormat('yyyy-MM-dd hh:mm:ss'),
+  // save document in database
+  order.save()
+  res.status(200).json({message: 'webhook received successfully'})
 }

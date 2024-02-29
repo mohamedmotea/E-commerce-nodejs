@@ -9,7 +9,8 @@ export const rule = {
 export const paymentMethod = {
   CASH: 'Cash',
   CREDIT: 'Credit Card',
-  PAYMOB:'Paymob'
+  PAYMOB:'Paymob',
+  STRIPE: 'Stripe'
 }
 
 export const orderstatus = {
