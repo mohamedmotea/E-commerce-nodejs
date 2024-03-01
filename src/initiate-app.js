@@ -4,13 +4,13 @@ import rollbackUploudedFiles from './Middlewares/rollback-uplouded-files-middlew
 import rollbackSavedDocuments from './Middlewares/rollback-saved-documents.middleware.js'
 import * as router from './Modules/index.routers.js'
 import { verifyCouponVaild } from './utils/crons.js'
+import stripe from 'stripe'
 
 const initiateApp = (app,express)=>{
   const port = process.env.PORT
   
   db_connection()
   app.post('/order/webhook', express.raw({type: 'application/json'}), (request, response) => {
-    console.log('here')
     const sig = request.headers['stripe-signature'].toString();
   
     let event;
