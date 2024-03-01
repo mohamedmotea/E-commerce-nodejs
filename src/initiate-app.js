@@ -9,7 +9,8 @@ const initiateApp = (app,express)=>{
   const port = process.env.PORT
   
   db_connection()
-  app.post('/order/webhook', express.raw({type: 'application/json'}), (request, response) => {
+  app.use('/order/webhook', express.raw({type: 'application/json'}), (request, response) => {
+    console.log('here')
     const sig = request.headers['stripe-signature'].toString();
   
     let event;
