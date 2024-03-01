@@ -11,10 +11,10 @@ export const signUp = async (req,res,next)=>{
   const checkEmail = await User.findOne({email})
   if(checkEmail) return res.status(409).json({message: "Email already exists"})
   // verify Email -> send code in email
-  const verify = await verifyEmailService(email,req)
-  // check is email valid
-  if(!verify) return next(new Error('email verify fail',{cause:400})) 
-  // Hashed password 
+const verify = await verifyEmailService(email,req)
+// check is email valid
+if(!verify) return next(new Error('email verify fail',{cause:400})) 
+// Hashed password 
   const hashedPassword = bcrypt.hashSync(password,+process.env.SALT_ROUNDES)
   if(!hashedPassword) return next(new Error('password fail try again',{cause:400}))
   // create a new User 

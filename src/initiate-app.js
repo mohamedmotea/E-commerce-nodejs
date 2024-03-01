@@ -10,12 +10,13 @@ const initiateApp = (app,express)=>{
   
   db_connection()
   app.post('/order/webhook', express.raw({type: 'application/json'}), (request, response) => {
-    const sig = request.headers['stripe-signature'];
+    const sig = request.headers['stripe-signature'].toString();
   
     let event;
   
     try {
       event = stripe.webhooks.constructEvent(request.body, sig, process.env.WEBHOOK_SECRET_KEY);
+      console.log('event')
     } catch (err) {
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;
