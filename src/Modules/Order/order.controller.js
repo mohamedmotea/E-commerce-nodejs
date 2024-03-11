@@ -396,6 +396,7 @@ export const webhook = async (req, res ,next) => {
   switch (event.type) {
     case 'checkout.session.completed':
       const checkoutSessionCompleted = event.data.object;
+      console.log('req.body:',req.body)
       const order = await Order.findById(req.body.data.object.metadata.orderId)
       if(!order) return next(new Error('order not found',{cause:404}))
       await confimedPaymentIntent({paymentIntentId:order.payment_method})
