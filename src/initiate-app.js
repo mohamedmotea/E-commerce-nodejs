@@ -12,13 +12,13 @@ import { webhook } from './Modules/Order/order.controller.js'
 
 const initiateApp = (app,express)=>{
   const port = process.env.PORT
-  // webhook
-app.post('/order/webhook', express.raw({type: 'application/json'}),expressAsyncHandler(webhook));
-
-    // c-o-r-s (https)
-    app.use(cors())
+  
+  // c-o-r-s (https)
+  app.use(cors())
   db_connection()
-
+  
+  // webhook
+  app.post('/order/webhook', express.raw({type: 'application/json'}),expressAsyncHandler(webhook));
   // parse data by express
   app.use(express.json())
 
@@ -49,11 +49,9 @@ app.post('/order/webhook', express.raw({type: 'application/json'}),expressAsyncH
         socket.emit('retrieveProducts',{products})
       })
       
-      // socket.on('addProduct',(data)=>{
-      //   console.log(data)
-      // })
       
     })
-
+    
+    
 }
 export default initiateApp
