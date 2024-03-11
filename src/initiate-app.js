@@ -1,16 +1,20 @@
 import cors from 'cors'
+import expressAsyncHandler from 'express-async-handler'
 import db_connection from '../DB/connection.js'
 import globalResponse from './Middlewares/global-response.middleware.js'
 import rollbackUploudedFiles from './Middlewares/rollback-uplouded-files-middleware.js'
 import rollbackSavedDocuments from './Middlewares/rollback-saved-documents.middleware.js'
 import * as router from './Modules/index.routers.js'
 import { verifyCouponVaild } from './utils/crons.js'
-import Io, { generateIo } from './utils/socketIo.js';
+import { generateIo } from './utils/socketIo.js';
 import Product from './../DB/Models/product.model.js';
+import { webhook } from './Modules/Order/order.controller.js'
 
 const initiateApp = (app,express)=>{
   const port = process.env.PORT
-  
+  // webhook
+.post('/order/webhook', express.raw({type: 'application/json'}),expressAsyncHandler(webhook));
+
     // c-o-r-s (https)
     app.use(cors())
   db_connection()
