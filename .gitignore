@@ -3,5 +3,3 @@ Files
 db_diagram.jpg
 config
 Dockerfile
-dev.config.env
-.gitignore
