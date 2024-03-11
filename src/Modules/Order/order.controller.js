@@ -381,7 +381,7 @@ export const webhookLocal = async (req, res ,next) => {
 }
 // webhook host
 export const webhook = async (req, res ,next) => {
-  const sig = res.headers['stripe-signature'].toString();
+  const sig = req.headers['stripe-signature'].toString();
   let event;
 
   try {
