@@ -1,4 +1,4 @@
-import { Router } from "express"
+import express ,{ Router } from "express"
 import expressAsyncHandler from "express-async-handler"
 import { rule } from './../../utils/systemRule.js';
 import vld from './../../Middlewares/validation.middleware.js';
@@ -17,30 +17,5 @@ router
 // payment -> stripe
 .post('/checkout/:orderId',auth([rule.USER,rule.SUPERADMIN,rule.ADMIN]),expressAsyncHandler(OC.payWithStripe))
 .post('/webhook',expressAsyncHandler(OC.webhookLocal))
-.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
-  const sig = request.headers['stripe-signature'].toString();
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(request.body, sig, process.env.WEBHOOK_SECRET_KEY);
-  } catch (err) {
-    response.status(400).send(`Webhook Error: ${err.message}`);
-    return;
-  }
-
-  // Handle the event
-  switch (event.type) {
-    case 'checkout.session.completed':
-      const checkoutSessionCompleted = event.data.object;
-      console.log('checkoutSessionCompleted',checkoutSessionCompleted)
-      // Then define and call a function to handle the event checkout.session.completed
-      break;
-    // ... handle other event types
-    default:
-      console.log(`Unhandled event type ${event.type}`);
-  }
-
-  // Return a 200 response to acknowledge receipt of the event
-  response.send();
-});
+.post('/webhook', express.raw({type: 'application/json'}),expressAsyncHandler(OC.webhook));
 export default router
