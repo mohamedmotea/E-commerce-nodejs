@@ -13,7 +13,7 @@ import { webhook } from './Modules/Order/order.controller.js'
 const initiateApp = (app,express)=>{
   const port = process.env.PORT
   // webhook
-.post('/order/webhook', express.raw({type: 'application/json'}),expressAsyncHandler(webhook));
+app.post('/order/webhook', express.raw({type: 'application/json'}),expressAsyncHandler(webhook));
 
     // c-o-r-s (https)
     app.use(cors())
