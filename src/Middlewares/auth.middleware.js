@@ -3,7 +3,7 @@ import User from '../../DB/Models/user.model.js';
 
 const auth = (roles)=>{
   return async(req,res,next)=>{
-  try {
+    try {
       const {token} = req.headers
       if(!token) return next(new Error('token is required',{cause:404}));
       const decodeToken = jwt.verify(token,process.env.TOKEN_SIGNATURE)

@@ -6,7 +6,7 @@ export const addProduct={
     title:Joi.string().required().min(1).max(255),
     desc:Joi.string(),
     basePrice:Joi.number().required(),
-    discount:Joi.number().required(),
+    discount:Joi.number(),
     stock:Joi.number().required(),
     specs:Joi.string().required()
   }),

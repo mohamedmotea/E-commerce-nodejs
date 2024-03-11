@@ -20,3 +20,9 @@ export const orderstatus = {
   CANCELLED: 'Cancelled',
   PAID: 'Paid'
 }
+
+export const systemProvider = {
+  GOOGLE: 'Google',
+  FACEBOOK: 'Facebook',
+  LINKEDIN: 'LinkedIn'
+}

@@ -105,7 +105,7 @@ export const createOrder = async (req, res, next) => {
   await checkProduct.save();
 
   // generate qr code
-  // const qrcode = await generateQrCode(order)
+  const qrcode = await generateQrCode(order)
   // generate pdf reset
   const orderInvoice ={
     shipping:{
@@ -129,19 +129,19 @@ export const createOrder = async (req, res, next) => {
     date:DateTime.now()
   }
   
-  // const orderCode = `${name}_${uniqueString(4)}.pdf`
-  //  createInvoice(orderInvoice,orderCode)
-  //  await sendEmailService({to:email,subject:'order from e-commerce',message:`
-  //  <h1>New Order ..</h1>
-  //  <p> please find your invoice pdf below </p>
-  //  `, attachments:[{path: path.resolve(`Files/${orderCode}`)}]})
+  const orderCode = `${name}_${uniqueString(4)}.pdf`
+   createInvoice(orderInvoice,orderCode)
+   await sendEmailService({to:email,subject:'order from e-commerce',message:`
+   <h1>New Order ..</h1>
+   <p> please find your invoice pdf below </p>
+   `, attachments:[{path: path.resolve(`Files/${orderCode}`)}]})
   res
     .status(201)
     .json({
       message: "order created successfully",
       data: order,
-      // qrcode,
       success: true,
+      qrcode,
     });
 };
 
@@ -378,4 +378,38 @@ export const webhookLocal = async (req, res ,next) => {
   // save document in database
   order.save()
   res.status(200).json({message: 'webhook received successfully'})
+}
+// webhook host
+export const webhook = async (req, res ,next) => {
+  const sig = request.headers['stripe-signature'].toString();
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(request.body, sig, process.env.WEBHOOK_SECRET_KEY);
+  } catch (err) {
+    response.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case 'checkout.session.completed':
+      const checkoutSessionCompleted = event.data.object;
+      const order = await Order.findById(req.body.data.object.metadata.orderId)
+      if(!order) return next(new Error('order not found',{cause:404}))
+      await confimedPaymentIntent({paymentIntentId:order.payment_method})
+      order.orderStatus = systemRule.orderstatus.PAID,
+      order.isPaid = true,
+      order.paidAt = DateTime.now().toFormat('yyyy-MM-dd hh:mm:ss'),
+      // save document in database
+      order.save()
+      res.status(200).json({message: 'webhook received successfully'})
+      break;
+    // ... handle other event types
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+
+
 }

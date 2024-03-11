@@ -1,3 +1,5 @@
 node_modules
 Files
 db_diagram.jpg
+config
+Dockerfile

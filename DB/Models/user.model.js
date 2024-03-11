@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { rule } from "../../src/utils/systemRule.js";
+import { rule, systemProvider } from "../../src/utils/systemRule.js";
 
 
 const user_schema = new Schema({
@@ -37,11 +37,18 @@ const user_schema = new Schema({
     type: Boolean,
     default: false
   },
-  phoneNumbers:[{type: String,required: true}],
-  addresses:[{type: String,required: true}],
+  phoneNumbers:[{type: String}],
+  addresses:[{type: String}],
   isLoggedIn:{
     type: Boolean,
     default: false
+  },
+  provider:{
+    type: String,
+    enum:Object.values(systemProvider)
+  },
+  code:{
+    type: String
   }
 },{timestamps: true})
 

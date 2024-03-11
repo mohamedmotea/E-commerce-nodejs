@@ -5,6 +5,7 @@ import Brand from './../../../DB/Models/brand.model.js';
 import cloudinaryConnection from './../../utils/cloudinary.js';
 import uniqueString from './../../utils/generate-unique-string.js';
 import ApiFeatures from "../../utils/api-features.js";
+import Io from "../../utils/socketIo.js";
 
 export const addProduct = async (req, res, next) => {
   // destructuring the request body
@@ -17,7 +18,7 @@ export const addProduct = async (req, res, next) => {
     specs 
   } = req.body;
   // destructuring the request query
-  const { categoryId,subCategoryId,brandId, } = req.query;
+  const { categoryId,subCategoryId,brandId } = req.query;
   // destructuring the user id
   const { id ,role} = req.user;
   // check upload images
@@ -68,6 +69,8 @@ export const addProduct = async (req, res, next) => {
   })
   // save product in database
   await product.save()
+  // socket.io new Product
+  Io().emit('newProduct',{product})
   req.saveDocument = {model:Product,_id:product._id}
    res.status(201).json({
     message:'product added successfully',
@@ -119,14 +122,14 @@ export const updateProduct = async (req, res, next) => {
     data:product
   })
 }
-export const getSingleProduct = async (req, res) => {
+export const getSingleProduct = async (req, res,next) => {
   const {productId} = req.params
   const product = await Product.findById(productId).populate([{path: 'brandId'},{path: 'categoryId'},{path:'subCategoryId'},{path:'addedBy',select:'username'}])
   if(!product) return next(new Error('Product not found',{cause:404}))
   res.status(200).json({
-message:'product fetched successfully',
-data:product
-})
+  message:'product fetched successfully',
+  data:product
+  })
 }
 
 export const deleteProduct = async (req, res, next) => {
@@ -145,9 +148,8 @@ res.status(200).json({
 }
 
 export const getAllProducts = async (req, res) => {
-  // const products = await Product.find().populate([{path: 'brandId'},{path: 'categoryId'},{path:'subCategoryId'},{path:'addedBy',select:'username'}])
   const {page , size , sort,...search} = req.query
-  const feature = new ApiFeatures(req.query,Product.find()).pagination({page,size}).sort(sort).search(search).filter(search)
+  const feature = new ApiFeatures(req.query,Product.find().populate([{path: 'brandId'},{path: 'categoryId'},{path:'subCategoryId'},{path:'addedBy',select:'username'}])).pagination({page,size}).sort(sort).search(search).filter(search)
   const products = await feature.mongooseQuery
   res.status(200).json({
     message:'products fetched successfully',

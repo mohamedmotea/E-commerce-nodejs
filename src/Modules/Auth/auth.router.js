@@ -14,5 +14,9 @@ router
 .post('/signin',vld(schema.signIn),expressAsyncHandler(AC.signIn))
 .put('/',auth([rule.USER,rule.ADMIN,rule.SUPERADMIN]),vld(schema.updateUser),expressAsyncHandler(AC.updateUser))
 .delete('/',auth([rule.USER,rule.ADMIN,rule.SUPERADMIN]),vld(schema.deleteUser),expressAsyncHandler(AC.deleteUser))
-
+.post('/forget',expressAsyncHandler(AC.forgetPassword))
+.post('/reset/:token',expressAsyncHandler(AC.resetPassword))
+// with GOOGLE
+.post('/google/signin',expressAsyncHandler(AC.googleLogin))
+.post('/google/signup',expressAsyncHandler(AC.googleSignUp))
 export default router
