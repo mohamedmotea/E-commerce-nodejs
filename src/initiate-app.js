@@ -32,6 +32,7 @@ const initiateApp = (app,express)=>{
   app.use('/cart',router.cartRouter)
   app.use('/coupon',router.couponRouter)
   app.use('/order',router.orderRouter)
+  app.use('/review',router.reviewRouter)
   app.use('*',(req,res,next)=> res.status(404).json({message:'page not found'}))
   
   // middleware to handle any errors

@@ -124,7 +124,7 @@ export const updateProduct = async (req, res, next) => {
 }
 export const getSingleProduct = async (req, res,next) => {
   const {productId} = req.params
-  const product = await Product.findById(productId).populate([{path: 'brandId'},{path: 'categoryId'},{path:'subCategoryId'},{path:'addedBy',select:'username'}])
+  const product = await Product.findById(productId).populate([{path: 'brandId'},{path: 'categoryId'},{path:'subCategoryId'},{path:'addedBy',select:'username'},{path:'reviews',populate:{path:'userId',select:'username'}}])
   if(!product) return next(new Error('Product not found',{cause:404}))
   res.status(200).json({
   message:'product fetched successfully',
@@ -149,7 +149,7 @@ res.status(200).json({
 
 export const getAllProducts = async (req, res) => {
   const {page , size , sort,...search} = req.query
-  const feature = new ApiFeatures(req.query,Product.find().populate([{path: 'brandId'},{path: 'categoryId'},{path:'subCategoryId'},{path:'addedBy',select:'username'}])).pagination({page,size}).sort(sort).search(search).filter(search)
+  const feature = new ApiFeatures(req.query,Product.find().populate([{path: 'brandId'},{path: 'categoryId'},{path:'subCategoryId'},{path:'addedBy',select:'username'},{path:'reviews',populate:{path:'userId',select:'username'}}])).pagination({page,size}).sort(sort).search(search).filter(search)
   const products = await feature.mongooseQuery
   res.status(200).json({
     message:'products fetched successfully',

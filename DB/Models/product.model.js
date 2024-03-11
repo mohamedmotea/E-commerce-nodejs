@@ -25,9 +25,13 @@ const product_schema = new Schema({
     type:Map,
     of:[String || Number]
   }
-},{timestamps: true})
+},{timestamps: true,toJSON:{virtuals:true},toObject:{virtuals:true}})
 
-
+product_schema.virtual('reviews',{
+  localField:'_id',
+  foreignField:'productId',
+  ref:'Review'
+})
 const Product = model('Product',product_schema)
 
 export default Product
