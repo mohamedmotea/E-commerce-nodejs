@@ -35,7 +35,7 @@ const order_schema = new Schema({
   orderStatus:{type:String,enum:Object.values(orderstatus),required:true,default:orderstatus.PENDING},
   paidAt:{type:String},
   deliveredAt:{type:String},
-  cancelledAt:{type:String},
+  cancelledAt:{type:String ,default:null},
   // Numbers
   totalPrice:{type:Number,required:true},
   // Booleans

@@ -5,7 +5,7 @@ import globalResponse from './Middlewares/global-response.middleware.js'
 import rollbackUploudedFiles from './Middlewares/rollback-uplouded-files-middleware.js'
 import rollbackSavedDocuments from './Middlewares/rollback-saved-documents.middleware.js'
 import * as router from './Modules/index.routers.js'
-import { verifyCouponVaild } from './utils/crons.js'
+import { cancelledOrder, verifyCouponVaild } from './utils/crons.js'
 import { generateIo } from './utils/socketIo.js';
 import Product from './../DB/Models/product.model.js';
 import { webhook } from './Modules/Order/order.controller.js'
@@ -39,6 +39,8 @@ const initiateApp = (app,express)=>{
   app.use(globalResponse,rollbackUploudedFiles,rollbackSavedDocuments)
   // check coupon is available in * 24h
   verifyCouponVaild()
+  // cancel order after 1 day 
+  cancelledOrder()
   // global router for handle invalid routes
   app.get('/', (req, res) => res.status(200).json({message:'invalid request'}))
   const server = app.listen(port, () => console.log(`server app listening on port ${port}!`))
